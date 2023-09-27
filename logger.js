@@ -1,6 +1,8 @@
+const getDate = () => new Date().toLocaleString();
+
 module.exports = {
-  announce: (message) => console.log(`  ${message}`),
-  log: (...messages) => console.log(...messages),
-  warn: (...messages) => console.warn(...messages),
-  error: (...messages) => console.error('[ERROR]', ...messages),
+  announce: (message) => console.log(`[${getDate()}] ${message}`),
+  log: (...messages) => console.log(`[${getDate()}]`, ...messages),
+  warn: (...messages) => console.warn(`[${getDate()}]`, ...messages),
+  error: (...messages) => console.error(`[${getDate()}] (ERROR)`, ...messages),
 };
