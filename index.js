@@ -20,7 +20,7 @@ const exec = async (arguments) => {
     }
     await runRequest(request, collection, environment);
   } catch (error) {
-    logger.error(error.message);
+    logger.error(error);
   }
 };
 

@@ -21,6 +21,10 @@ const parseUrl = (url, variables) => {
     logger.warn(`URL '${parsedUrl}' does not start with 'http'. Assuming HTTPS.`);
     parsedUrl = `https://${parsedUrl}`;
   }
+
+  if (parsedUrl.startsWith('https://localhost') || parsedUrl.startsWith('https://127.0.0.1')) {
+    logger.warn(`Localhost IP is being called with HTTPS protocol. This might not be intentional.`);
+  }
   
   return parsedUrl;
 };
