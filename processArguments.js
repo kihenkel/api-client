@@ -27,7 +27,7 @@ const SPECIAL_COMMANDS = [{
   name: 'help',
   action: (context) => {
     logger.announce(`Available commands: ${SPECIAL_COMMANDS.map((command) => command.name).join(', ')}`);
-    logger.announce(`Available flags:\n${AVAILABLE_FLAGS.map((flag) => `    ${flag.flags.join(', ')}: ${flag.description}`).join('/n')}`);
+    logger.announce(`Available flags:\n${AVAILABLE_FLAGS.map((flag) => `    ${flag.flags.join(', ')}: ${flag.description}`).join('\n')}`);
     logger.announce(`Available environments: ${context.environments.map((environment) => environment.id).join(', ')}`);
     logger.announce(`Available requests:`);
     context.collections.forEach((collection) => {
