@@ -14,6 +14,13 @@ const AVAILABLE_FLAGS = [{
     }
     return { success: true };
   }
+}, {
+  name: 'saveToFile',
+  flags: ['-s', '--save'],
+  needsValue: true,
+  description: 'File to save the response to',
+  announcement: (value) => `Saving response to file ${value}`,
+  required: false,
 }];
 
 const SPECIAL_COMMANDS = [{

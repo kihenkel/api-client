@@ -63,7 +63,9 @@ const runRequest = async (request, collection, environment) => {
   console.log('');
   logger.announce(`Response: ${status} ${statusText}`);
   logger.announce('Response Body:');
-  console.log(JSON.stringify(json || text, null, 2));
+  const responseBody = JSON.stringify(json || text, null, 2)
+  console.log(responseBody);
+  return responseBody;
 };
 
 module.exports = runRequest;

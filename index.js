@@ -1,3 +1,4 @@
+const fs = require('fs');
 const environments = require('./environments');
 const collections = require('./collections');
 const processArguments = require('./processArguments');
@@ -18,7 +19,10 @@ const exec = async (arguments) => {
     if (!environment) {
       throw new Error(`Environment '${flags.environment}' not found`);
     }
-    await runRequest(request, collection, environment);
+    const response = await runRequest(request, collection, environment);
+    if (flags.saveToFile) {
+      fs.writeFileSync(flags.saveToFile, response);
+    }
   } catch (error) {
     logger.error(error);
   }
