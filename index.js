@@ -1,17 +1,18 @@
 const fs = require('fs');
-const environments = require('./environments');
-const collections = require('./collections');
 const processArguments = require('./processArguments');
+const { getCollections, getEnvironments } = require('./data');
 const { findRequestById } = require('./helpers');
 const logger = require('./logger');
 const runRequest = require('./runRequest');
 
 const exec = async (arguments) => {
   try {
+    const collections = getCollections();
+    const environments = getEnvironments();
     const { command, flags } = processArguments(arguments, { environments, collections });
     if (!command) return;
   
-    const { request, collection } = findRequestById(collections, command);
+    const request = findRequestById(collections, command);
     const environment = environments.find((environment) => environment.id === flags.environment);
     if (!request) {
       throw new Error(`Request '${command}' not found`);
@@ -19,9 +20,9 @@ const exec = async (arguments) => {
     if (!environment) {
       throw new Error(`Environment '${flags.environment}' not found`);
     }
-    const response = await runRequest(request, collection, environment);
+    const response = await runRequest(request, environment);
     if (flags.saveToFile) {
-      fs.writeFileSync(flags.saveToFile, response);
+      fs.writeFileSync(flags.saveToFile, JSON.stringify(response, null, 2));
     }
   } catch (error) {
     logger.error(error);

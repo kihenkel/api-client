@@ -1,3 +1,5 @@
+const logger = require('./logger');
+
 const getAllRequestIds = (collection) => {
   const ids = collection.requests.reduce((currentIds, request) => {
     if (request.requests) {
@@ -8,26 +10,60 @@ const getAllRequestIds = (collection) => {
   return ids;
 };
 
-const findRequestByIdFromCollection = (collection, id) => {
-  let foundRequest;
-  collection.requests.find((request) => {
-    if (request.requests) {
-      foundRequest = findRequestByIdFromCollection(request, id);
+const cascadingProperties = ['variables', 'headers', 'dependencies'];
+const mergeRequestProperties = (objA, objB) => {
+  return cascadingProperties.reduce((currentProperties, propertyName) => {
+    const parentProperty = objA[propertyName] ?? [];
+    const currentProperty = currentProperties[propertyName] ?? [];
+    const mergedParentAndCurrent = mergePropertyArrays(parentProperty, currentProperty);
+    return {
+      ...currentProperties,
+      [propertyName]: objB[propertyName] ?
+        mergePropertyArrays(mergedParentAndCurrent, objB[propertyName]) :
+        mergedParentAndCurrent,
+    };
+  }, {})
+};
+
+// arr2 takes precedence
+const mergePropertyArrays = (arr1, arr2) => {
+  const mergedArray = [...arr1];
+  arr2.forEach((item2) => {
+    if (typeof item2 === 'object') {
+      if (!item2.key) {
+        logger.warn(`Cannot merge array item as it is missing the 'key' identifier.`);
+        return;
+      }
+      const arr1Index = mergedArray.findIndex((item1) => item1?.key === item2.key);
+      if (arr1Index >= 0) {
+        mergedArray[arr1Index] = item2;
+      } else {
+        mergedArray.push(item2);
+      }
     } else {
-      foundRequest = request.id === id ? request : undefined;
+      if (mergedArray.indexOf(item2) === -1) {
+        mergedArray.push(item2);
+      }
+    }
+  });
+
+  return mergedArray;
+};
+
+const findRequestById = (collections, id, parentProperties = {}) => {
+  let foundRequest;
+  collections.some((request) => {
+    const collectionProperties = mergeRequestProperties(parentProperties, request);
+    if (request.requests) {
+      foundRequest = findRequestById(request.requests, id, collectionProperties);
+    } else {
+      foundRequest = request.id === id ?
+        { ...request, ...mergeRequestProperties(collectionProperties, request) } :
+        undefined;
     }
     return !!foundRequest;
   });
   return foundRequest;
-}
-
-const findRequestById = (collections, id) => {
-  let request;
-  const collection = collections.find((collection) => {
-    request = findRequestByIdFromCollection(collection, id);
-    return !!request;
-  });
-  return { request, collection };
 };
 
 const keyValueArrayToObject = (array) => {
@@ -39,8 +75,22 @@ const keyValueArrayToObject = (array) => {
   }, {});
 };
 
+const getProperty = (obj, path, delimiter = '.') => {
+  const property = path.split(delimiter).reduce((currentValue, segment) => {
+    if (!currentValue) {
+      return undefined;
+    }
+    return currentValue[segment];
+  }, obj);
+  if (!property) {
+    logger.error(`Could not find '${path}' in object.`);
+  }
+  return property;
+};
+
 module.exports = {
   getAllRequestIds,
   findRequestById,
   keyValueArrayToObject,
+  getProperty,
 };
