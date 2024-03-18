@@ -42,7 +42,14 @@ const read = async (key) => {
   return { age, data: json.data };
 };
 
+const clear = async () => {
+  const cacheDir = nodePath.join(__dirname, CACHE_PATH);
+  const cacheDirExists = await dirExists(cacheDir);
+  return cacheDirExists && fs.rm(cacheDir, { recursive: true, force: true });
+};
+
 module.exports = {
   write,
   read,
+  clear,
 };

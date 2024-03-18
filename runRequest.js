@@ -1,5 +1,10 @@
 const { getCollections } = require('./data');
-const { keyValueArrayToObject, findRequestById, getProperty } = require('./helpers');
+const {
+  keyValueArrayToObject,
+  findRequestById,
+  getProperty,
+  getObjectName,
+} = require('./helpers');
 const doRequest = require('./http');
 const cache = require('./cache');
 const logger = require('./logger');
@@ -50,8 +55,8 @@ const parseBody = (body, variables) => {
 };
 
 const executeRequest = async (request, environment, options, dependencyResults) => {
-  const { isDependency } = options;
-  if (isDependency && request.cacheAsDependency) {
+  const { isDependency, flags } = options;
+  if (isDependency && request.cacheAsDependency && !flags.noCache) {
     const { age, data } = await cache.read(getDependencyCacheKey(request));
     if (!data) {
       logger.announce(`No cache found for '${request.id}', executing request ...`);
@@ -81,27 +86,31 @@ const executeRequest = async (request, environment, options, dependencyResults) 
 
   const requestResult = await doRequest(parsedUrl, requestOptions);
 
-  if (isDependency && request.cacheAsDependency) {
+  if (isDependency && request.cacheAsDependency && !flags.noCache) {
     await cache.write(getDependencyCacheKey(request), requestResult);
   }
   return requestResult;
 }
 
 const runRequest = async (request, environment, options = {}) => {
-  logger.announce(`Running request '${request.name}' ...`);
+  logger.announce(`Running request '${getObjectName(request)}' ...`);
   const { isDependency } = options;
 
   let dependencyResults = [];
   if (request.dependencies?.length > 0) {
     logger.announce(`Request dependencies detected: ${request.dependencies}`);
     const dependencyRequests = request.dependencies.map(requestId => findRequestById(getCollections(), requestId));
-    dependencyResults = await Promise.all(dependencyRequests.map((dependencyRequest) => runRequest(dependencyRequest, environment, { isDependency: true })));
+    dependencyResults = await Promise.all(
+      dependencyRequests.map((dependencyRequest) => 
+        runRequest(dependencyRequest, environment, { ...options, isDependency: true })
+      )
+    );
   }
 
   const requestResult  = await executeRequest(request, environment, options, dependencyResults);
   const { status, statusText, json, text } = requestResult;
   const responseData = json || text;
-  if (isDependency) {
+  if (isDependency && status >= 200 && status < 300) {
     return responseData;
   }
   console.log('');

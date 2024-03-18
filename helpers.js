@@ -82,15 +82,21 @@ const getProperty = (obj, path, delimiter = '.') => {
     }
     return currentValue[segment];
   }, obj);
-  if (!property) {
-    logger.error(`Could not find '${path}' in object.`);
+  if (property === undefined) {
+    logger.error(`Unable to find '${path}' in object.`);
+  }
+  if (property === null) {
+    logger.warn(`Value '${path}' for given object is null.`);
   }
   return property;
 };
+
+const getObjectName = (obj) => obj.name ?? obj.id;
 
 module.exports = {
   getAllRequestIds,
   findRequestById,
   keyValueArrayToObject,
   getProperty,
+  getObjectName,
 };

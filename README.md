@@ -15,8 +15,8 @@ A CLI-based API client. Like Postman, but without all the sign-in nonsense.
 |      Property     |  Type  | Required | Default | Description                                                                    | Example                                                  |
 |:-----------------:|:------:|:--------:|:-------:|--------------------------------------------------------------------------------|----------------------------------------------------------|
 |                id | String | Required |    -    | Unique identifier for the request                                              | requestId1                                               |
-|              name | String | Required |    -    | Display name for request                                                       | My Request                                               |
 |               url | String | Required |    -    | The request URL. Accepts variables.                                            | https://google.com                                       |
+|              name | String | Optional |    -    | Display name for request                                                       | My Request                                               |
 |            method | String | Optional |   GET   | The request method                                                             | POST                                                     |
 |              body | Object | Optional |    -    | The request body (JSON)                                                        | { "username": "test@mail.com" }                          |
 |           headers |  Array | Optional |    []   | The request headers (array of key-value pairs)                                 | [{ "key": "Content-Type", "value": "application/json" }] |
