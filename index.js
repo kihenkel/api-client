@@ -3,8 +3,9 @@ const processArguments = require('./processArguments');
 const { getCollections, getEnvironments } = require('./data');
 const cache = require('./cache');
 const { findRequestById, getObjectName } = require('./helpers');
-const logger = require('./logger');
 const runRequest = require('./runRequest');
+const initCheck = require('./initCheck');
+const logger = require('./logger');
 
 const exec = async (arguments) => {
   try {
@@ -15,12 +16,10 @@ const exec = async (arguments) => {
   
     const request = findRequestById(collections, command);
     const environment = environments.find((environment) => flags.environment ? environment.id === flags.environment : environment.default);
-    if (!request) {
-      throw new Error(`Request '${command}' not found`);
-    }
-    if (!environment) {
-      if (flags.environment) throw new Error(`Environment '${flags.environment}' not found`);
-      else throw new Error(`No environment flag or default set`);
+    const initCheckFailedMessage = initCheck({ request, command, environment, flags });
+    if (initCheckFailedMessage) {
+      logger.error(initCheckFailedMessage);
+      return;
     }
     if (!flags.environment) {
       logger.announce(`No environment flag set, using default environment '${getObjectName(environment)}' ...`)
