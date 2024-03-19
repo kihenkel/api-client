@@ -4,6 +4,7 @@ const {
   findRequestById,
   getProperty,
   getObjectName,
+  getVariableFromCodeString,
 } = require('./helpers');
 const doRequest = require('./http');
 const cache = require('./cache');
@@ -13,10 +14,16 @@ const getDependencyCacheKey = (request) => `dependency_${request.id}`;
 
 const replaceVariables = (string, variables) => {
   return string.replace(/{{(.*?)}}/g, (_match, variable) => {
-    // Character $ reserved for dependency results
-    const matchedVar = variable.startsWith('$') ?
-      getProperty(variables.__dependencyResults, variable.slice(1)) :
-      variables[variable];
+    let matchedVar;
+    if (variable.startsWith('$')) {
+      // Character $ used for dependency results
+      matchedVar = getProperty(variables.__dependencyResults, variable.slice(1));
+    } else if (variable.startsWith('@')) {
+      // Character @ used for JS code
+      matchedVar = getVariableFromCodeString(variable.slice(1));
+    } else {
+      matchedVar = variables[variable];
+    }
     if (matchedVar === undefined) {
       throw new Error(`Variable '${variable}' not found`);
     }

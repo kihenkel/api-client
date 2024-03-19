@@ -105,6 +105,15 @@ Example:
 ]
 ```
 
+### Dependency result variables
+
+Use $ as a prefix. E.g. `{{$0.myData.token}}`
+
+### Code snippet variables
+
+Use @ as a prefix. E.g. `{{@Date.now()}}`
+This will execute provided string as JavaScript, use with caution.
+
 ## Dependencies
 
 You can define requests as dependencies for other requests, and inject their response data. This is helpful e.g. for authentication prior to every request.

@@ -93,10 +93,21 @@ const getProperty = (obj, path, delimiter = '.') => {
 
 const getObjectName = (obj) => obj.name ?? obj.id;
 
+const getVariableFromCodeString = (str) => {
+  const codeString = str.startsWith('return ') ? str : `return ${str}`;
+  try {
+    return new Function(codeString)();
+  } catch (error) {
+    logger.error('Failed to execute code snipped inside variable brackets', error);
+    return undefined;
+  }
+}
+
 module.exports = {
   getAllRequestIds,
   findRequestById,
   keyValueArrayToObject,
   getProperty,
   getObjectName,
+  getVariableFromCodeString,
 };
