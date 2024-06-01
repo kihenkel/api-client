@@ -114,7 +114,7 @@ const runRequest = async (request, environment, options = {}) => {
     );
   }
 
-  const requestResult  = await executeRequest(request, environment, options, dependencyResults);
+  const requestResult = await executeRequest(request, environment, options, dependencyResults);
   const { status, statusText, json, text } = requestResult;
   const responseData = json || text;
   if (isDependency && status >= 200 && status < 300) {

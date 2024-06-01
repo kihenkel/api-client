@@ -142,9 +142,10 @@ Full example:
     "dependencies": ["authenticate"],
     "url": "https://myWebsite.com/data",
     "method": "GET",
-    "headers": {
-      "Authentication": "Bearer {{$0.data.authToken}}"
-    }
+    "headers": [{
+      "key": "Authorization",
+      "value": "Bearer {{$0.data.authToken}}"
+    }]
   }
 ]
 ```
